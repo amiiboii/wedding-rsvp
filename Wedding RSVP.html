@@ -91,7 +91,7 @@ body.loaded{opacity:1}
 .env-roses{position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden}
 .env-roses img{display:block;width:100%;height:100%;object-fit:cover;object-position:center;opacity:.32;mix-blend-mode:multiply}
 
-.env-container{position:relative;width:min(860px,96vw);flex-shrink:0;z-index:1}
+.env-container{position:relative;width:min(640px,88vw);flex-shrink:0;z-index:1}
 .env-stage{position:relative;width:100%;aspect-ratio:704/813;overflow:hidden}
 
 .env-piece{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;transform:translateY(40px);animation:env-in .9s ease var(--ep-del,.3s) forwards}
@@ -118,8 +118,8 @@ body.loaded{opacity:1}
 .heart-wrap{position:relative;display:flex;align-items:center;justify-content:center}
 .heart-wrap>img{display:block;width:100%;height:auto;filter:drop-shadow(0 4px 14px rgba(42,28,16,.1))}
 .heart-overlay{position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:.2rem;text-align:center}
-.h-lbl{font-size:clamp(.32rem,.8vw,.46rem);letter-spacing:.28em;text-transform:uppercase;color:var(--text2)}
-.h-dt{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:clamp(.65rem,1.6vw,.86rem);letter-spacing:.1em;color:var(--text)}
+.h-lbl{font-size:clamp(.55rem,1.4vw,.8rem);letter-spacing:.28em;text-transform:uppercase;color:var(--text2)}
+.h-dt{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:clamp(1.1rem,2.8vw,1.6rem);letter-spacing:.1em;color:var(--text)}
 .ec-fl img{display:block;width:100%;height:auto;filter:drop-shadow(0 4px 12px rgba(42,28,16,.08))}
 
 .venue-wrap{text-align:center;display:flex;flex-direction:column;align-items:center;gap:.25rem;z-index:1;margin-top:clamp(-10rem,-20vw,-3rem)}
@@ -462,12 +462,15 @@ body.loaded{opacity:1}
     submitBtn.disabled = true;
     submitBtn.textContent = 'Sending…';
 
-    fetch(SHEET_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify(data)
-    })
+    const params = new URLSearchParams({
+      timestamp: data.timestamp,
+      attendance: data.attendance,
+      name: data.name,
+      phone: data.phone,
+      guests: data.guests,
+      message: data.message
+    });
+    fetch(`${SHEET_URL}?${params}`, { method: 'GET', mode: 'no-cors' })
     .finally(() => {
       fs.style.cssText = 'opacity:0;transform:translateY(-18px);transition:all .4s ease;pointer-events:none';
       setTimeout(() => {
