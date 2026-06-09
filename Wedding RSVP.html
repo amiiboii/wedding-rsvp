@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bisaru & Lahiru — 05 November 2026</title>
+<title>Bisaru &amp; Lahiru · 05 November 2026</title>
+<link rel="icon" type="image/png" href="Images/Flower.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,600&family=Raleway:wght@200;300;400&display=swap" rel="stylesheet">
 <style>
@@ -61,31 +62,31 @@ body.loaded{opacity:1}
 #la-px{position:relative;width:min(700px,88vw);flex-shrink:0;z-index:4;will-change:transform;transition:transform .1s linear}
 #la-fl{width:100%}
 #la-fl.floating{animation:la-float 9s ease-in-out infinite}
-.la-img{display:block;width:100%;height:auto;mix-blend-mode:multiply;clip-path:circle(0% at 52% 89%);opacity:0;filter:blur(7px);animation:la-bloom 3.4s cubic-bezier(.16,1.1,.3,1) .6s forwards}
-.la-ring{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 52% 89%,transparent max(0%,calc(var(--rr,0%) - 3%)),rgba(196,168,79,.9) calc(var(--rr,0%) - 1%),rgba(196,168,79,.3) var(--rr,0%),transparent calc(var(--rr,0%) + 3.5%));animation:ring-sweep 3.4s cubic-bezier(.16,1.1,.3,1) .6s forwards;opacity:0}
-.la-hglow{position:absolute;left:57%;top:51%;width:76px;height:76px;border-radius:50%;pointer-events:none;mix-blend-mode:multiply;background:radial-gradient(circle,rgba(196,168,79,.6) 0%,transparent 68%);transform:translate(-50%,-50%) scale(0);animation:hgp 2.8s ease-in-out 4.4s infinite}
+.la-img{display:block;width:100%;height:auto;mix-blend-mode:multiply;clip-path:circle(0% at 52% 89%);opacity:0;filter:blur(7px);animation:la-bloom 2.2s cubic-bezier(.16,1.1,.3,1) .3s forwards}
+.la-ring{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 52% 89%,transparent max(0%,calc(var(--rr,0%) - 3%)),rgba(196,168,79,.9) calc(var(--rr,0%) - 1%),rgba(196,168,79,.3) var(--rr,0%),transparent calc(var(--rr,0%) + 3.5%));animation:ring-sweep 2.2s cubic-bezier(.16,1.1,.3,1) .3s forwards;opacity:0}
+.la-hglow{position:absolute;left:57%;top:51%;width:76px;height:76px;border-radius:50%;pointer-events:none;mix-blend-mode:multiply;background:radial-gradient(circle,rgba(196,168,79,.6) 0%,transparent 68%);transform:translate(-50%,-50%) scale(0);animation:hgp 2.8s ease-in-out 2.8s infinite}
 .la-shimmer{position:absolute;inset:0;pointer-events:none;mix-blend-mode:overlay;transition:background .07s linear}
 
 .hero-names{position:relative;z-index:10;text-align:center;padding:2rem 2rem 4rem;display:flex;flex-direction:column;align-items:center;gap:.5rem;width:100%}
 .hn{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:clamp(2rem,6vw,3.8rem);letter-spacing:.25em;text-transform:uppercase;line-height:1;opacity:0}
-.hn.n1{animation:fu 1.2s ease 4.0s forwards}
-.hn.n2{animation:fu 1.2s ease 4.5s forwards}
-.h-amp{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;font-size:clamp(1.4rem,3.2vw,2.2rem);color:var(--gold);line-height:1.2;opacity:0;animation:fu 1.2s ease 4.25s forwards}
-.h-orn{width:180px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:.3rem 0;opacity:0;animation:fu 1.2s ease 4.68s forwards}
-.h-venue{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:clamp(1rem,3vw,1.7rem);letter-spacing:.16em;text-transform:uppercase;opacity:0;animation:fu 1.2s ease 4.85s forwards}
-.h-date-block{display:flex;flex-direction:column;align-items:center;gap:.28rem;padding:.65rem 2.4rem;margin-top:.2rem;border:1px solid var(--goldA);opacity:0;animation:fu 1.2s ease 5.05s forwards}
+.hn.n1{animation:fu 1.2s ease 2.6s forwards}
+.hn.n2{animation:fu 1.2s ease 3.0s forwards}
+.h-amp{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;font-size:clamp(1.4rem,3.2vw,2.2rem);color:var(--gold);line-height:1.2;opacity:0;animation:fu 1.2s ease 2.8s forwards}
+.h-orn{width:180px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:.3rem 0;opacity:0;animation:fu 1.2s ease 3.15s forwards}
+.h-venue{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:clamp(1rem,3vw,1.7rem);letter-spacing:.16em;text-transform:uppercase;opacity:0;animation:fu 1.2s ease 3.3s forwards}
+.h-date-block{display:flex;flex-direction:column;align-items:center;gap:.28rem;padding:.65rem 2.4rem;margin-top:.2rem;border:1px solid var(--goldA);opacity:0;animation:fu 1.2s ease 3.45s forwards}
 .h-date-label{font-size:clamp(.4rem,.9vw,.52rem);letter-spacing:.38em;text-transform:uppercase;color:var(--text2)}
 .h-date{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:clamp(1.2rem,3vw,2rem);letter-spacing:.12em;color:var(--text);line-height:1}
 .h-date-sub{font-size:clamp(.45rem,1vw,.58rem);letter-spacing:.28em;text-transform:uppercase;color:var(--gold)}
-.h-schedule{display:flex;flex-direction:column;align-items:center;gap:.22rem;opacity:0;animation:fu 1.2s ease 5.3s forwards}
+.h-schedule{display:flex;flex-direction:column;align-items:center;gap:.22rem;opacity:0;animation:fu 1.2s ease 3.6s forwards}
 .h-sch-row{display:flex;align-items:center;gap:.5rem;font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:400;font-size:clamp(.72rem,1.8vw,1rem);color:var(--text2);letter-spacing:.07em}
 .h-sch-dot{width:3.5px;height:3.5px;border-radius:50%;background:var(--goldA);flex-shrink:0}
-.h-scroll{display:flex;flex-direction:column;align-items:center;gap:.4rem;margin-top:.7rem;opacity:0;animation:fu 1.2s ease 6.0s forwards}
+.h-scroll{display:flex;flex-direction:column;align-items:center;gap:.4rem;margin-top:.7rem;opacity:0;animation:fu 1.2s ease 4.0s forwards}
 .h-scroll span{font-size:.5rem;letter-spacing:.35em;text-transform:uppercase;color:var(--text2)}
 .h-sl{width:1px;height:34px;background:linear-gradient(var(--gold),transparent);animation:sl 2.3s ease-in-out infinite}
 
 /* SECTION 2 - ENVELOPE */
-#s-env{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 1.5rem 1.5rem;gap:.4rem;position:relative;overflow:hidden;background:var(--bg)}
+#s-env{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 1.5rem 1.5rem;gap:0;position:relative;overflow:hidden;background:var(--bg)}
 
 .env-roses{position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden}
 .env-roses img{display:block;width:100%;height:100%;object-fit:cover;object-position:center;opacity:.32;mix-blend-mode:multiply}
@@ -99,10 +100,10 @@ body.loaded{opacity:1}
 .env-body{z-index:10;--ep-del:.45s;filter:drop-shadow(0 22px 55px rgba(42,28,16,.14)) drop-shadow(0 6px 16px rgba(42,28,16,.07))}
 
 .ec{position:absolute;opacity:0;will-change:transform;z-index:5;animation:ec-pop .8s cubic-bezier(.34,1.56,.64,1) var(--pd,3s) both}
-.ec-fl    {width:17%;left:3%;top:6%;--pd:2.5s}
-.ec-photo {width:28%;left:6%;top:13%;--pd:2.9s}
-.ec-std   {width:33%;right:4%;top:8%;--pd:3.2s}
-.ec-heart {width:46%;left:27%;top:16%;--pd:3.5s}
+.ec-fl    {width:17%;left:3%;top:6%;--pd:1.6s}
+.ec-photo {width:28%;left:6%;top:13%;--pd:1.9s}
+.ec-std   {width:33%;right:4%;top:8%;--pd:2.1s}
+.ec-heart {width:46%;left:27%;top:16%;--pd:2.3s}
 
 .env-beads-ext{position:absolute;right:-9%;top:8%;width:13%;transform-origin:top center;animation:bead-sway 5s ease-in-out infinite;z-index:20}
 .env-beads-ext img{display:block;width:100%;height:auto;filter:drop-shadow(0 4px 10px rgba(42,28,16,.12))}
@@ -121,14 +122,14 @@ body.loaded{opacity:1}
 .h-dt{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:clamp(.65rem,1.6vw,.86rem);letter-spacing:.1em;color:var(--text)}
 .ec-fl img{display:block;width:100%;height:auto;filter:drop-shadow(0 4px 12px rgba(42,28,16,.08))}
 
-.venue-wrap{text-align:center;display:flex;flex-direction:column;align-items:center;gap:.25rem;z-index:1}
-.vw-sub{font-size:.55rem;letter-spacing:.35em;text-transform:uppercase;color:var(--text2);opacity:0;animation:fu 1s ease 5s forwards}
-.vw-venue{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:clamp(1rem,3vw,1.6rem);letter-spacing:.16em;text-transform:uppercase;opacity:0;animation:fu 1s ease 5.2s forwards}
-.vw-date{font-size:.58rem;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);opacity:0;animation:fu 1s ease 5.4s forwards}
-.vw-ceremony{margin-top:.4rem;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:.3rem .7rem;opacity:0;animation:fu 1s ease 5.6s forwards}
+.venue-wrap{text-align:center;display:flex;flex-direction:column;align-items:center;gap:.25rem;z-index:1;margin-top:-10rem}
+.vw-sub{font-size:.55rem;letter-spacing:.35em;text-transform:uppercase;color:var(--text2);opacity:0;animation:fu 1s ease 3.2s forwards}
+.vw-venue{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:clamp(1rem,3vw,1.6rem);letter-spacing:.16em;text-transform:uppercase;opacity:0;animation:fu 1s ease 3.4s forwards}
+.vw-date{font-size:.58rem;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);opacity:0;animation:fu 1s ease 3.6s forwards}
+.vw-ceremony{margin-top:.4rem;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:.3rem .7rem;opacity:0;animation:fu 1s ease 3.8s forwards}
 .vw-cer{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:400;font-size:clamp(.7rem,1.8vw,.98rem);color:var(--text2);letter-spacing:.07em}
 .vw-sep{width:3px;height:3px;border-radius:50%;background:var(--goldA);flex-shrink:0}
-.vw-btn{margin-top:1.4rem;padding:.88rem 3rem;border:1.5px solid var(--text);background:transparent;color:var(--text);font-family:'Raleway',sans-serif;font-size:.62rem;letter-spacing:.32em;text-transform:uppercase;cursor:none;position:relative;overflow:hidden;transition:color .4s;opacity:0;animation:fu 1s ease 5.8s forwards}
+.vw-btn{margin-top:1.4rem;padding:.88rem 3rem;border:1.5px solid var(--text);background:transparent;color:var(--text);font-family:'Raleway',sans-serif;font-size:.62rem;letter-spacing:.32em;text-transform:uppercase;cursor:none;position:relative;overflow:hidden;transition:color .4s;opacity:0;animation:fu 1s ease 4.0s forwards}
 .vw-btn::after{content:'';position:absolute;inset:0;background:var(--text);transform:translateX(-102%);transition:transform .45s cubic-bezier(.77,0,.175,1);z-index:-1}
 .vw-btn:hover{color:var(--bg)}
 .vw-btn:hover::after{transform:translateX(0)}
