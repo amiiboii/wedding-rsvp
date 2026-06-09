@@ -470,18 +470,19 @@ body.loaded{opacity:1}
       guests: data.guests,
       message: data.message
     });
-    fetch(`${SHEET_URL}?${params}`, { method: 'GET', mode: 'no-cors' })
-    .finally(() => {
-      fs.style.cssText = 'opacity:0;transform:translateY(-18px);transition:all .4s ease;pointer-events:none';
-      setTimeout(() => {
-        fs.style.display = 'none'; ss.classList.add('show');
-        const rc = rCard.getBoundingClientRect();
-        for (let i = 0; i < 32; i++) setTimeout(() => spark({
-          clientX: rc.left + Math.random() * rc.width,
-          clientY: rc.top  + Math.random() * rc.height
-        }), i * 45);
-      }, 420);
-    });
+
+    const beacon = new Image();
+    beacon.src = `${SHEET_URL}?${params}`;
+
+    fs.style.cssText = 'opacity:0;transform:translateY(-18px);transition:all .4s ease;pointer-events:none';
+    setTimeout(() => {
+      fs.style.display = 'none'; ss.classList.add('show');
+      const rc = rCard.getBoundingClientRect();
+      for (let i = 0; i < 32; i++) setTimeout(() => spark({
+        clientX: rc.left + Math.random() * rc.width,
+        clientY: rc.top  + Math.random() * rc.height
+      }), i * 45);
+    }, 420);
   });
 })();
 </script>
