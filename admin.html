@@ -18,32 +18,57 @@ body{background:var(--bg);color:var(--text);font-family:'Raleway',sans-serif;min
 .gate button:hover{background:var(--text);color:var(--bg)}
 .gate .err{color:#c44;font-size:.7rem;margin-top:.6rem;display:none}
 
-.dashboard{display:none;width:100%;max-width:1100px;padding:2rem}
+.dashboard{display:none;width:100%;max-width:1100px;padding:2rem;margin:0 auto}
 .dashboard.show{display:block}
 .dash-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;flex-wrap:wrap;gap:1rem}
 .dash-header h1{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:1.6rem;letter-spacing:.1em}
-.dash-actions{display:flex;gap:.6rem}
+.dash-actions{display:flex;gap:.6rem;flex-wrap:wrap}
 .dash-btn{padding:.55rem 1.5rem;border:1px solid var(--text);background:transparent;color:var(--text);font-family:'Raleway',sans-serif;font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:all .3s}
 .dash-btn:hover{background:var(--text);color:var(--bg)}
 .dash-btn.gold{border-color:var(--gold);color:var(--gold)}
 .dash-btn.gold:hover{background:var(--gold);color:#fff}
 
-.stats{display:flex;gap:1.5rem;margin-bottom:2rem;flex-wrap:wrap}
-.stat{padding:1.2rem 1.8rem;border:1px solid var(--goldA);text-align:center;min-width:120px}
+.stats{display:flex;gap:1rem;margin-bottom:2rem;flex-wrap:wrap}
+.stat{padding:1rem 1.4rem;border:1px solid var(--goldA);text-align:center;min-width:80px;flex:1}
 .stat-num{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:500;color:var(--gold)}
 .stat-label{font-size:.5rem;letter-spacing:.25em;text-transform:uppercase;color:var(--text2);margin-top:.2rem}
 
-table{width:100%;border-collapse:collapse;font-size:.78rem}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:.78rem;min-width:600px}
 thead{background:rgba(42,28,16,.06)}
-th{font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text2);padding:.8rem .6rem;text-align:left;border-bottom:1px solid var(--goldA)}
+th{font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text2);padding:.8rem .6rem;text-align:left;border-bottom:1px solid var(--goldA);white-space:nowrap}
 td{padding:.7rem .6rem;border-bottom:1px solid rgba(42,28,16,.08);vertical-align:top}
 tr:hover{background:rgba(184,144,96,.06)}
-.badge{display:inline-block;padding:.15rem .5rem;border-radius:2px;font-size:.5rem;letter-spacing:.12em;text-transform:uppercase}
+.badge{display:inline-block;padding:.15rem .5rem;border-radius:2px;font-size:.5rem;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
 .badge-yes{background:rgba(76,145,65,.12);color:#3a7a2e}
 .badge-no{background:rgba(180,60,60,.1);color:#a33}
 .badge-maybe{background:rgba(184,144,96,.15);color:#8a6a30}
+.del-btn{padding:.3rem .7rem;border:1px solid #c44;background:transparent;color:#c44;font-family:'Raleway',sans-serif;font-size:.5rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s;white-space:nowrap}
+.del-btn:hover{background:#c44;color:#fff}
 .empty{text-align:center;padding:3rem;color:var(--text2);font-style:italic}
 .loading{text-align:center;padding:2rem;color:var(--text2);font-size:.8rem}
+
+.confirm-overlay{display:none;position:fixed;inset:0;background:rgba(42,28,16,.5);z-index:100;align-items:center;justify-content:center}
+.confirm-overlay.show{display:flex}
+.confirm-box{background:var(--bg);padding:2rem;text-align:center;max-width:340px;width:90%;box-shadow:0 12px 40px rgba(42,28,16,.2)}
+.confirm-box p{font-size:.85rem;margin-bottom:1.2rem;line-height:1.6}
+.confirm-box .cb-actions{display:flex;gap:.8rem;justify-content:center}
+
+/* MOBILE */
+@media(max-width:640px){
+  .dashboard{padding:1rem .8rem}
+  .dash-header{flex-direction:column;align-items:flex-start}
+  .dash-header h1{font-size:1.2rem}
+  .dash-actions{width:100%}
+  .dash-btn{flex:1;text-align:center;padding:.5rem .6rem;font-size:.48rem;letter-spacing:.15em}
+  .stats{gap:.6rem}
+  .stat{padding:.8rem .6rem;min-width:0}
+  .stat-num{font-size:1.5rem}
+  .stat-label{font-size:.42rem;letter-spacing:.18em}
+  table{font-size:.7rem}
+  th{padding:.6rem .4rem;font-size:.42rem}
+  td{padding:.5rem .4rem}
+}
 </style>
 </head>
 <body>
@@ -67,18 +92,25 @@ tr:hover{background:rgba(184,144,96,.06)}
 
   <div class="stats" id="stats"></div>
 
-  <div id="table-wrap">
+  <div class="table-wrap" id="table-wrap">
     <p class="loading" id="loading">Loading RSVPs...</p>
+  </div>
+</div>
+
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <p id="confirm-msg">Remove this entry?</p>
+    <div class="cb-actions">
+      <button class="dash-btn" onclick="confirmDelete()">Remove</button>
+      <button class="dash-btn" onclick="cancelDelete()">Cancel</button>
+    </div>
   </div>
 </div>
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js';
-import { getDatabase, ref, push, onValue } from 'https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js';
+import { getDatabase, ref, push, onValue, remove } from 'https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js';
 
-// ============================================
-// PASTE YOUR FIREBASE CONFIG BELOW
-// ============================================
 const firebaseConfig = {
   apiKey: "AIzaSyDjDMjVXc7ubHJK0EvusYnxhA4RjeFBeQU",
   authDomain: "bisaru2026.firebaseapp.com",
@@ -88,12 +120,12 @@ const firebaseConfig = {
   messagingSenderId: "454196774978",
   appId: "1:454196774978:web:2ef63c7f5a1f65466785db"
 };
-// ============================================
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 let allRSVPs = [];
+let pendingDeleteId = null;
 
 window.checkPw = function() {
   const pw = document.getElementById('pw').value;
@@ -148,7 +180,7 @@ function renderTable() {
   const badgeClass = v => v === 'yes' ? 'badge-yes' : v === 'no' ? 'badge-no' : 'badge-maybe';
   const badgeText = v => v === 'yes' ? 'Accepts' : v === 'no' ? 'Declines' : 'Tentative';
 
-  let html = '<table><thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Attendance</th><th>Message</th><th>Date</th></tr></thead><tbody>';
+  let html = '<table><thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Status</th><th>Message</th><th>Date</th><th></th></tr></thead><tbody>';
   allRSVPs.forEach((r, i) => {
     const d = r.timestamp ? new Date(r.timestamp).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '-';
     html += `<tr>
@@ -158,6 +190,7 @@ function renderTable() {
       <td><span class="badge ${badgeClass(r.attendance)}">${badgeText(r.attendance)}</span></td>
       <td>${esc(r.message || '-')}</td>
       <td>${d}</td>
+      <td><button class="del-btn" onclick="askDelete('${r.id}','${esc(r.name || 'this entry')}')">Remove</button></td>
     </tr>`;
   });
   html += '</tbody></table>';
@@ -169,6 +202,25 @@ function esc(s) {
   d.textContent = s;
   return d.innerHTML;
 }
+
+window.askDelete = function(id, name) {
+  pendingDeleteId = id;
+  document.getElementById('confirm-msg').textContent = 'Remove RSVP from "' + name + '"?';
+  document.getElementById('confirm-overlay').classList.add('show');
+};
+
+window.confirmDelete = function() {
+  if (pendingDeleteId) {
+    remove(ref(db, 'rsvps/' + pendingDeleteId));
+    pendingDeleteId = null;
+  }
+  document.getElementById('confirm-overlay').classList.remove('show');
+};
+
+window.cancelDelete = function() {
+  pendingDeleteId = null;
+  document.getElementById('confirm-overlay').classList.remove('show');
+};
 
 window.refreshData = loadData;
 
