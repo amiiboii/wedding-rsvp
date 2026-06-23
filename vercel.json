@@ -1,5 +1,6 @@
 {
   "rewrites": [
-    { "source": "/", "destination": "/Wedding RSVP.html" }
+    { "source": "/", "destination": "/Wedding RSVP.html" },
+    { "source": "/admin", "destination": "/admin.html" }
   ]
 }

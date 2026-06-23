@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin · RSVP Backup</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Raleway:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#faf5ee;--text:#2a1c10;--text2:#7a6248;--gold:#b89060;--goldA:rgba(184,144,96,.32)}
+body{background:var(--bg);color:var(--text);font-family:'Raleway',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column}
+
+.gate{text-align:center;padding:3rem 2rem}
+.gate h1{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:1.8rem;margin-bottom:1.5rem;letter-spacing:.15em}
+.gate input{display:block;width:260px;margin:0 auto .8rem;padding:.7rem 1rem;border:1px solid rgba(42,28,16,.25);background:rgba(255,255,255,.4);font-family:'Raleway',sans-serif;font-size:.85rem;text-align:center;outline:none;transition:border-color .3s}
+.gate input:focus{border-color:var(--gold)}
+.gate button{padding:.7rem 2.5rem;border:1.5px solid var(--text);background:transparent;color:var(--text);font-family:'Raleway',sans-serif;font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.gate button:hover{background:var(--text);color:var(--bg)}
+.gate .err{color:#c44;font-size:.7rem;margin-top:.6rem;display:none}
+
+.dashboard{display:none;width:100%;max-width:1100px;padding:2rem}
+.dashboard.show{display:block}
+.dash-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;flex-wrap:wrap;gap:1rem}
+.dash-header h1{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:1.6rem;letter-spacing:.1em}
+.dash-actions{display:flex;gap:.6rem}
+.dash-btn{padding:.55rem 1.5rem;border:1px solid var(--text);background:transparent;color:var(--text);font-family:'Raleway',sans-serif;font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.dash-btn:hover{background:var(--text);color:var(--bg)}
+.dash-btn.gold{border-color:var(--gold);color:var(--gold)}
+.dash-btn.gold:hover{background:var(--gold);color:#fff}
+
+.stats{display:flex;gap:1.5rem;margin-bottom:2rem;flex-wrap:wrap}
+.stat{padding:1.2rem 1.8rem;border:1px solid var(--goldA);text-align:center;min-width:120px}
+.stat-num{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:500;color:var(--gold)}
+.stat-label{font-size:.5rem;letter-spacing:.25em;text-transform:uppercase;color:var(--text2);margin-top:.2rem}
+
+table{width:100%;border-collapse:collapse;font-size:.78rem}
+thead{background:rgba(42,28,16,.06)}
+th{font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text2);padding:.8rem .6rem;text-align:left;border-bottom:1px solid var(--goldA)}
+td{padding:.7rem .6rem;border-bottom:1px solid rgba(42,28,16,.08);vertical-align:top}
+tr:hover{background:rgba(184,144,96,.06)}
+.badge{display:inline-block;padding:.15rem .5rem;border-radius:2px;font-size:.5rem;letter-spacing:.12em;text-transform:uppercase}
+.badge-yes{background:rgba(76,145,65,.12);color:#3a7a2e}
+.badge-no{background:rgba(180,60,60,.1);color:#a33}
+.badge-maybe{background:rgba(184,144,96,.15);color:#8a6a30}
+.empty{text-align:center;padding:3rem;color:var(--text2);font-style:italic}
+.loading{text-align:center;padding:2rem;color:var(--text2);font-size:.8rem}
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate">
+  <h1>Admin Access</h1>
+  <input type="password" id="pw" placeholder="Enter password" autocomplete="off">
+  <button onclick="checkPw()">Enter</button>
+  <p class="err" id="pw-err">Incorrect password</p>
+</div>
+
+<div class="dashboard" id="dashboard">
+  <div class="dash-header">
+    <h1>RSVP Backup Dashboard</h1>
+    <div class="dash-actions">
+      <button class="dash-btn" onclick="refreshData()">Refresh</button>
+      <button class="dash-btn gold" onclick="downloadJSON()">Download JSON</button>
+      <button class="dash-btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div id="table-wrap">
+    <p class="loading" id="loading">Loading RSVPs...</p>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js';
+import { getDatabase, ref, push, onValue } from 'https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js';
+
+// ============================================
+// PASTE YOUR FIREBASE CONFIG BELOW
+// ============================================
+const firebaseConfig = {
+  apiKey: "AIzaSyDjDMjVXc7ubHJK0EvusYnxhA4RjeFBeQU",
+  authDomain: "bisaru2026.firebaseapp.com",
+  databaseURL: "https://bisaru2026-default-rtdb.firebaseio.com",
+  projectId: "bisaru2026",
+  storageBucket: "bisaru2026.firebasestorage.app",
+  messagingSenderId: "454196774978",
+  appId: "1:454196774978:web:2ef63c7f5a1f65466785db"
+};
+// ============================================
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+let allRSVPs = [];
+
+window.checkPw = function() {
+  const pw = document.getElementById('pw').value;
+  if (pw === 'bisaru2026') {
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('dashboard').classList.add('show');
+    loadData();
+  } else {
+    document.getElementById('pw-err').style.display = 'block';
+  }
+};
+
+document.getElementById('pw').addEventListener('keydown', e => {
+  if (e.key === 'Enter') window.checkPw();
+});
+
+function loadData() {
+  const rsvpRef = ref(db, 'rsvps');
+  onValue(rsvpRef, snapshot => {
+    allRSVPs = [];
+    snapshot.forEach(child => {
+      allRSVPs.push({ id: child.key, ...child.val() });
+    });
+    allRSVPs.reverse();
+    renderStats();
+    renderTable();
+  }, err => {
+    document.getElementById('loading').textContent = 'Error loading data. Check Firebase config.';
+  });
+}
+
+function renderStats() {
+  const total = allRSVPs.length;
+  const yes = allRSVPs.filter(r => r.attendance === 'yes').length;
+  const no = allRSVPs.filter(r => r.attendance === 'no').length;
+  const maybe = allRSVPs.filter(r => r.attendance === 'maybe').length;
+
+  document.getElementById('stats').innerHTML =
+    `<div class="stat"><div class="stat-num">${total}</div><div class="stat-label">Total</div></div>` +
+    `<div class="stat"><div class="stat-num">${yes}</div><div class="stat-label">Accepted</div></div>` +
+    `<div class="stat"><div class="stat-num">${no}</div><div class="stat-label">Declined</div></div>` +
+    `<div class="stat"><div class="stat-num">${maybe}</div><div class="stat-label">Tentative</div></div>`;
+}
+
+function renderTable() {
+  const wrap = document.getElementById('table-wrap');
+  if (allRSVPs.length === 0) {
+    wrap.innerHTML = '<p class="empty">No RSVPs yet</p>';
+    return;
+  }
+
+  const badgeClass = v => v === 'yes' ? 'badge-yes' : v === 'no' ? 'badge-no' : 'badge-maybe';
+  const badgeText = v => v === 'yes' ? 'Accepts' : v === 'no' ? 'Declines' : 'Tentative';
+
+  let html = '<table><thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Attendance</th><th>Message</th><th>Date</th></tr></thead><tbody>';
+  allRSVPs.forEach((r, i) => {
+    const d = r.timestamp ? new Date(r.timestamp).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '-';
+    html += `<tr>
+      <td>${i + 1}</td>
+      <td>${esc(r.name || '-')}</td>
+      <td>${esc(r.phone || '-')}</td>
+      <td><span class="badge ${badgeClass(r.attendance)}">${badgeText(r.attendance)}</span></td>
+      <td>${esc(r.message || '-')}</td>
+      <td>${d}</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+window.refreshData = loadData;
+
+window.downloadJSON = function() {
+  const blob = new Blob([JSON.stringify(allRSVPs, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'rsvp-backup-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+
+window.logout = function() {
+  document.getElementById('dashboard').classList.remove('show');
+  document.getElementById('gate').style.display = 'block';
+  document.getElementById('pw').value = '';
+};
+</script>
+</body>
+</html>
