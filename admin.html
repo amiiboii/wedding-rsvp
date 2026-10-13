@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin · RSVP Backup</title>
+<meta name="robots" content="noindex, nofollow">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Raleway:wght@300;400&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -16,7 +17,8 @@ body{background:var(--bg);color:var(--text);font-family:'Raleway',sans-serif;min
 .gate input:focus{border-color:var(--gold)}
 .gate button{padding:.7rem 2.5rem;border:1.5px solid var(--text);background:transparent;color:var(--text);font-family:'Raleway',sans-serif;font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;cursor:pointer;transition:all .3s}
 .gate button:hover{background:var(--text);color:var(--bg)}
-.gate .err{color:#c44;font-size:.7rem;margin-top:.6rem;display:none}
+.gate .err{color:#c44;font-size:.75rem;margin:1rem auto 0;max-width:420px;line-height:1.6}
+.err-box{padding:1.2rem 1.4rem;border:1px solid rgba(180,60,60,.35);background:rgba(180,60,60,.05);color:#7a2a2a;font-size:.8rem;line-height:1.7}
 
 .dashboard{display:none;width:100%;max-width:1100px;padding:2rem;margin:0 auto}
 .dashboard.show{display:block}
@@ -76,17 +78,17 @@ tr:hover{background:rgba(184,144,96,.06)}
 <div class="gate" id="gate">
   <h1>Admin Access</h1>
   <input type="password" id="pw" placeholder="Enter password" autocomplete="off">
-  <button onclick="checkPw()">Enter</button>
-  <p class="err" id="pw-err">Incorrect password</p>
+  <button id="pw-btn">Enter</button>
+  <p class="err" id="pw-err"></p>
 </div>
 
 <div class="dashboard" id="dashboard">
   <div class="dash-header">
     <h1>RSVP Backup Dashboard</h1>
     <div class="dash-actions">
-      <button class="dash-btn" onclick="refreshData()">Refresh</button>
-      <button class="dash-btn gold" onclick="downloadJSON()">Download JSON</button>
-      <button class="dash-btn" onclick="logout()">Logout</button>
+      <button class="dash-btn" id="refresh-btn">Refresh</button>
+      <button class="dash-btn gold" id="download-btn">Download JSON</button>
+      <button class="dash-btn" id="logout-btn">Logout</button>
     </div>
   </div>
 
@@ -101,15 +103,15 @@ tr:hover{background:rgba(184,144,96,.06)}
   <div class="confirm-box">
     <p id="confirm-msg">Remove this entry?</p>
     <div class="cb-actions">
-      <button class="dash-btn" onclick="confirmDelete()">Remove</button>
-      <button class="dash-btn" onclick="cancelDelete()">Cancel</button>
+      <button class="dash-btn" id="confirm-yes">Remove</button>
+      <button class="dash-btn" id="confirm-no">Cancel</button>
     </div>
   </div>
 </div>
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js';
-import { getDatabase, ref, push, onValue, remove } from 'https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js';
+import { getDatabase, ref, onValue, remove } from 'https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDjDMjVXc7ubHJK0EvusYnxhA4RjeFBeQU",
@@ -124,27 +126,32 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+const $ = id => document.getElementById(id);
+
 let allRSVPs = [];
 let pendingDeleteId = null;
+let unsubscribe = null;
 
-window.checkPw = function() {
-  const pw = document.getElementById('pw').value;
-  if (pw === 'bisaru2026') {
-    document.getElementById('gate').style.display = 'none';
-    document.getElementById('dashboard').classList.add('show');
+function checkPw() {
+  if ($('pw').value === 'bisaru2026') {
+    $('pw-err').textContent = '';
+    $('gate').style.display = 'none';
+    $('dashboard').classList.add('show');
     loadData();
   } else {
-    document.getElementById('pw-err').style.display = 'block';
+    $('pw-err').textContent = 'Incorrect password';
   }
-};
+}
 
-document.getElementById('pw').addEventListener('keydown', e => {
-  if (e.key === 'Enter') window.checkPw();
+$('pw-btn').addEventListener('click', checkPw);
+$('pw').addEventListener('keydown', e => {
+  if (e.key === 'Enter') checkPw();
 });
 
 function loadData() {
-  const rsvpRef = ref(db, 'rsvps');
-  onValue(rsvpRef, snapshot => {
+  if (unsubscribe) unsubscribe();
+  $('table-wrap').innerHTML = '<p class="loading">Loading RSVPs...</p>';
+  unsubscribe = onValue(ref(db, 'rsvps'), snapshot => {
     allRSVPs = [];
     snapshot.forEach(child => {
       allRSVPs.push({ id: child.key, ...child.val() });
@@ -153,25 +160,32 @@ function loadData() {
     renderStats();
     renderTable();
   }, err => {
-    document.getElementById('loading').textContent = 'Error loading data. Check Firebase config.';
+    unsubscribe = null;
+    const box = document.createElement('div');
+    box.className = 'err-box';
+    box.textContent = /permission/i.test(String(err && (err.code || err.message)))
+      ? 'Permission denied by the Firebase Realtime Database rules (Firebase console → Realtime Database → Rules — see database.rules.json). The Google Sheet backup still has every RSVP.'
+      : 'Error loading data: ' + (err && err.message ? err.message : err);
+    $('stats').innerHTML = '';
+    $('table-wrap').replaceChildren(box);
   });
 }
 
 function renderStats() {
-  const total = allRSVPs.length;
-  const yes = allRSVPs.filter(r => r.attendance === 'yes').length;
-  const no = allRSVPs.filter(r => r.attendance === 'no').length;
-  const maybe = allRSVPs.filter(r => r.attendance === 'maybe').length;
-
-  document.getElementById('stats').innerHTML =
-    `<div class="stat"><div class="stat-num">${total}</div><div class="stat-label">Total</div></div>` +
-    `<div class="stat"><div class="stat-num">${yes}</div><div class="stat-label">Accepted</div></div>` +
-    `<div class="stat"><div class="stat-num">${no}</div><div class="stat-label">Declined</div></div>` +
-    `<div class="stat"><div class="stat-num">${maybe}</div><div class="stat-label">Tentative</div></div>`;
+  const count = v => allRSVPs.filter(r => r.attendance === v).length;
+  const stats = [[allRSVPs.length, 'Total'], [count('yes'), 'Accepted'], [count('no'), 'Declined'], [count('maybe'), 'Tentative']];
+  $('stats').replaceChildren(...stats.map(([n, label]) => {
+    const s = document.createElement('div'); s.className = 'stat';
+    const num = document.createElement('div'); num.className = 'stat-num'; num.textContent = n;
+    const lab = document.createElement('div'); lab.className = 'stat-label'; lab.textContent = label;
+    s.append(num, lab);
+    return s;
+  }));
 }
 
+// Built with textContent (not innerHTML) so a guest's name or message can never run code here.
 function renderTable() {
-  const wrap = document.getElementById('table-wrap');
+  const wrap = $('table-wrap');
   if (allRSVPs.length === 0) {
     wrap.innerHTML = '<p class="empty">No RSVPs yet</p>';
     return;
@@ -179,65 +193,68 @@ function renderTable() {
 
   const badgeClass = v => v === 'yes' ? 'badge-yes' : v === 'no' ? 'badge-no' : 'badge-maybe';
   const badgeText = v => v === 'yes' ? 'Accepts' : v === 'no' ? 'Declines' : 'Tentative';
+  const cell = (text) => { const td = document.createElement('td'); td.textContent = text; return td; };
 
-  let html = '<table><thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Status</th><th>Message</th><th>Date</th><th></th></tr></thead><tbody>';
+  const table = document.createElement('table');
+  table.innerHTML = '<thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Status</th><th>Message</th><th>Date</th><th></th></tr></thead>';
+  const tbody = document.createElement('tbody');
   allRSVPs.forEach((r, i) => {
     const d = r.timestamp ? new Date(r.timestamp).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '-';
-    html += `<tr>
-      <td>${i + 1}</td>
-      <td>${esc(r.name || '-')}</td>
-      <td>${esc(r.phone || '-')}</td>
-      <td><span class="badge ${badgeClass(r.attendance)}">${badgeText(r.attendance)}</span></td>
-      <td>${esc(r.message || '-')}</td>
-      <td>${d}</td>
-      <td><button class="del-btn" onclick="askDelete('${r.id}','${esc(r.name || 'this entry')}')">Remove</button></td>
-    </tr>`;
+    const tr = document.createElement('tr');
+    const status = document.createElement('td');
+    const badge = document.createElement('span');
+    badge.className = 'badge ' + badgeClass(r.attendance);
+    badge.textContent = badgeText(r.attendance);
+    status.append(badge);
+    const act = document.createElement('td');
+    const del = document.createElement('button');
+    del.className = 'del-btn';
+    del.textContent = 'Remove';
+    del.addEventListener('click', () => askDelete(r.id, r.name || 'this entry'));
+    act.append(del);
+    tr.append(cell(i + 1), cell(r.name || '-'), cell(r.phone || '-'), status, cell(r.message || '-'), cell(d), act);
+    tbody.append(tr);
   });
-  html += '</tbody></table>';
-  wrap.innerHTML = html;
+  table.append(tbody);
+  wrap.replaceChildren(table);
 }
 
-function esc(s) {
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
-}
-
-window.askDelete = function(id, name) {
+function askDelete(id, name) {
   pendingDeleteId = id;
-  document.getElementById('confirm-msg').textContent = 'Remove RSVP from "' + name + '"?';
-  document.getElementById('confirm-overlay').classList.add('show');
-};
+  $('confirm-msg').textContent = 'Remove RSVP from "' + name + '"?';
+  $('confirm-overlay').classList.add('show');
+}
 
-window.confirmDelete = function() {
+$('confirm-yes').addEventListener('click', () => {
   if (pendingDeleteId) {
-    remove(ref(db, 'rsvps/' + pendingDeleteId));
+    remove(ref(db, 'rsvps/' + pendingDeleteId)).catch(err => alert('Could not remove: ' + err.message));
     pendingDeleteId = null;
   }
-  document.getElementById('confirm-overlay').classList.remove('show');
-};
+  $('confirm-overlay').classList.remove('show');
+});
 
-window.cancelDelete = function() {
+$('confirm-no').addEventListener('click', () => {
   pendingDeleteId = null;
-  document.getElementById('confirm-overlay').classList.remove('show');
-};
+  $('confirm-overlay').classList.remove('show');
+});
 
-window.refreshData = loadData;
+$('refresh-btn').addEventListener('click', loadData);
 
-window.downloadJSON = function() {
+$('download-btn').addEventListener('click', () => {
   const blob = new Blob([JSON.stringify(allRSVPs, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'rsvp-backup-' + new Date().toISOString().slice(0,10) + '.json';
   a.click();
   URL.revokeObjectURL(a.href);
-};
+});
 
-window.logout = function() {
-  document.getElementById('dashboard').classList.remove('show');
-  document.getElementById('gate').style.display = 'block';
-  document.getElementById('pw').value = '';
-};
+$('logout-btn').addEventListener('click', () => {
+  if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+  $('dashboard').classList.remove('show');
+  $('gate').style.display = 'block';
+  $('pw').value = '';
+});
 </script>
 </body>
 </html>
